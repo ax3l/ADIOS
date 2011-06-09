@@ -225,12 +225,33 @@ ADIOS_VARINFO * common_read_inq_var_byid (ADIOS_GROUP *gp, int varid)
 void common_read_free_varinfo (ADIOS_VARINFO *vp)
 {
     if (vp) {
+        int ntimes = 0;
+        int i;
+        if (vp->timedim >= 0) {
+            ntimes = vp->dims [vp->timedim];
+        }
+
         if (vp->dims)   free(vp->dims);
         if (vp->value)  free(vp->value);
         if (vp->gmin && vp->gmin != vp->value)   free(vp->gmin);
         if (vp->gmax && vp->gmax != vp->value)   free(vp->gmax);
-        //if (vp->mins)   free(vp->mins);
-        //if (vp->maxs)   free(vp->maxs);
+        if (vp->gavg && vp->gavg != vp->value)   free(vp->gavg);
+        if (vp->gstd_dev) free(vp->gstd_dev);
+
+        for (i = 0; i < ntimes; i ++) {
+            if (vp->maxs && vp->maxs [i]) free (vp->maxs [i]);
+            if (vp->mins && vp->mins [i]) free (vp->mins [i]);
+            if (vp->avgs && vp->avgs [i]) free (vp->avgs [i]);
+            if (vp->std_devs && vp->std_devs [i]) free (vp->std_devs [i]);
+            if (vp->hist && vp->hist->frequenciess && vp->hist->frequenciess[i]) free (vp->hist->frequenciess [i]);
+        }
+
+        if (vp->maxs) free (vp->maxs);
+        if (vp->mins) free (vp->mins);
+        if (vp->avgs) free (vp->avgs);
+        if (vp->std_devs) free (vp->std_devs); 
+        if (vp->hist) { free (vp->hist->breaks); free (vp->hist->frequenciess); free (vp->hist->gfrequencies); free (vp->hist); }
+
         free(vp);
     }
 }

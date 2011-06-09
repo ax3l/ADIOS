@@ -37,6 +37,9 @@ static enum ADIOS_FLAG adios_host_language_fortran = adios_flag_yes;
 struct adios_method_list_struct * adios_methods = 0;
 struct adios_group_list_struct * adios_groups = 0;
 
+// NCSU
+struct adios_hist_list_struct * adios_hists = 0;
+
 //extern struct adios_method_list_struct * adios_methods;
 //extern struct adios_group_list_struct * adios_groups;
 
@@ -3233,6 +3236,15 @@ void adios_cleanup ()
         free (adios_methods->method);
         free (adios_methods);
         adios_methods = methods;
+    }
+
+    while (adios_hists)
+    {
+        struct adios_hist_list_struct * hists = adios_hists->next;
+        if (adios_hists->hist)
+            free (adios_hists->hist);
+        free (adios_hists);
+        adios_hists = hists;
     }
 
     while (adios_groups)

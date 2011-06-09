@@ -66,6 +66,15 @@ struct adios_hist_struct
     double * breaks; //breaks array for the histogram, output this to gnuplot
 };
 
+// NCSU - structure for tracking histogram breaks
+struct adios_hist_list_struct
+{
+    struct adios_hist_struct * hist;
+    uint16_t var_id;
+    uint16_t var_parent_id;
+    struct adios_hist_list_struct * next;
+};
+
 struct adios_attribute_struct
 {
     uint16_t id;
@@ -390,6 +399,9 @@ void adios_add_method_to_group (struct adios_method_list_struct ** root
                                );
 
 void adios_append_group (struct adios_group_struct * group);
+
+// NCSU - Append histogram to group
+void adios_append_hist (uint16_t var_id, uint16_t var_parent_id, struct adios_hist_struct *hist);
 
 // is the var name unique
 enum ADIOS_FLAG adios_append_var (struct adios_var_struct ** root

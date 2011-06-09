@@ -863,13 +863,20 @@ int bp_parse_characteristics (struct adios_bp_buffer_struct_v1 * b,
 						if (i == adios_statistic_hist)
 						{
 							uint32_t bi;
-							
+							double *temp_data;
+
 							(*root)->characteristics [j].stats[c][idx].data = malloc (sizeof(struct adios_index_characteristics_hist_struct));
 							struct adios_index_characteristics_hist_struct * hist = (*root)->characteristics [j].stats[c][idx].data; 
 
             				BUFREAD32(b, hist->num_breaks)
-            				hist->min = * (double *) bp_read_data_from_buffer(b, adios_double);
-            				hist->max = * (double *) bp_read_data_from_buffer(b, adios_double);
+
+                            temp_data = (double *) bp_read_data_from_buffer(b, adios_double);
+            				hist->min = *temp_data;
+                            free (temp_data);
+                             
+                            temp_data = (double *) bp_read_data_from_buffer(b, adios_double);
+            				hist->max = *temp_data; 
+                            free (temp_data);
 
             				hist->frequencies = malloc((hist->num_breaks + 1) * adios_get_type_size(adios_unsigned_integer, ""));
             				for (bi = 0; bi <= hist->num_breaks; bi ++) {
@@ -878,7 +885,9 @@ int bp_parse_characteristics (struct adios_bp_buffer_struct_v1 * b,
 
             				hist->breaks = malloc(hist->num_breaks * adios_get_type_size(adios_double, ""));
             				for (bi = 0; bi < hist->num_breaks; bi ++) {
-            				    hist->breaks[bi] = * (double *) bp_read_data_from_buffer(b, adios_double);
+                                temp_data = (double *) bp_read_data_from_buffer(b, adios_double);
+            				    hist->breaks[bi] = *temp_data;
+                                free (temp_data);
             				}
 						}
 						else

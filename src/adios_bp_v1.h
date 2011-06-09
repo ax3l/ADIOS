@@ -31,7 +31,7 @@ enum ADIOS_CHARACTERISTICS
 };
 
 #ifndef ADIOS_STAT_LENGTH
-	#define ADIOS_STAT_LENGTH 7 
+	#define ADIOS_STAT_LENGTH 8 
 #endif
 
 // NCSU - Adding statistics
@@ -44,6 +44,7 @@ enum ADIOS_STAT
     ,adios_statistic_sum_square 	 = 4 
     ,adios_statistic_hist		 	 = 5 
 	,adios_statistic_finite		     = 6 
+	,adios_statistic_variance        = 7 
 };
 
 struct adios_bp_buffer_struct_v1

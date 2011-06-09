@@ -2250,6 +2250,7 @@ uint64_t adios_get_stat_size (void * data, enum ADIOS_DATATYPES type, enum ADIOS
                 case adios_statistic_max:
                 case adios_statistic_sum:
                 case adios_statistic_sum_square:
+                case adios_statistic_variance:
                     return adios_get_type_size(adios_double, "");
 
                 case adios_statistic_finite:
@@ -2265,6 +2266,7 @@ uint64_t adios_get_stat_size (void * data, enum ADIOS_DATATYPES type, enum ADIOS
                 case adios_statistic_max:
                 case adios_statistic_sum:
                 case adios_statistic_sum_square:
+                case adios_statistic_variance:
                     return adios_get_type_size(adios_long_double, "");
 
                 case adios_statistic_finite:
@@ -2283,6 +2285,7 @@ uint64_t adios_get_stat_size (void * data, enum ADIOS_DATATYPES type, enum ADIOS
 
                 case adios_statistic_sum:
                 case adios_statistic_sum_square:
+                case adios_statistic_variance:
                     return adios_get_type_size(adios_double, "");
 
                 case adios_statistic_finite:
