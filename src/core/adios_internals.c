@@ -1810,7 +1810,6 @@ int64_t adios_common_define_var (int64_t group_id, const char * name
 
     v->id = ++t->member_count;
     adios_append_var (t, v);
-    t->var_count++; // NCSU ALACRITY-ADIOS: Added this back, it's needed by the transform code (for now)
 
     return (int64_t)v;
 }
