@@ -63,7 +63,7 @@ int main (int argc, char ** argv)
     strcpy (filename, bp_file_name);
 
 
-    adios_init (xml_file_name);
+    adios_init (xml_file_name, comm);
 
     adios_open (&adios_handle, "temperature", filename, "w", comm);
 //	#include "gwrite_temperature.ch"
