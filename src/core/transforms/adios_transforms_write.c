@@ -74,13 +74,13 @@ uint64_t adios_transform_worst_case_transformed_group_size(uint64_t group_size, 
 static struct adios_dimension_struct * new_dimension() {
     struct adios_dimension_struct *dim = (struct adios_dimension_struct *)malloc(sizeof(struct adios_dimension_struct));
     dim->dimension.rank = 0;
-    dim->dimension.id = 0;
+    dim->dimension.var = NULL;
     dim->dimension.time_index = adios_flag_no;
     dim->global_dimension.rank = 0;
-    dim->global_dimension.id = 0;
+    dim->global_dimension.var = NULL;
     dim->global_dimension.time_index = adios_flag_unknown;
     dim->local_offset.rank = 0;
-    dim->local_offset.id = 0;
+    dim->local_offset.var = NULL;
     dim->local_offset.time_index = adios_flag_unknown;
     dim->next = 0;
     return dim;
@@ -100,7 +100,7 @@ static int find_time_dimension(struct adios_dimension_struct *dim, struct adios_
         // have a time dimension, and must infer the location based on whether
         // this is FORTRAN or not
         if (!cur_dim->next) {
-            if (cur_dim->global_dimension.id == 0 && cur_dim->global_dimension.rank == 0) {
+            if (cur_dim->global_dimension.var == NULL && cur_dim->global_dimension.rank == 0) {
                 if (fortran_order_flag == adios_flag_yes) {
                     if (time_dim) *time_dim = cur_dim;
                     return i;
@@ -407,13 +407,13 @@ static void adios_transform_dereference_dimensions_var(struct adios_dimension_st
             (struct adios_dimension_struct *)malloc(sizeof (struct adios_dimension_struct));
 
         // de-reference dimension id
-        d_new->dimension.id = 0;
+        d_new->dimension.var = NULL;
         d_new->dimension.rank = adios_get_dim_value(&src_var_dims->dimension);
         d_new->dimension.time_index = src_var_dims->dimension.time_index;
-        d_new->global_dimension.id = 0;
+        d_new->global_dimension.var = NULL;
         d_new->global_dimension.rank = adios_get_dim_value(&src_var_dims->global_dimension);
         d_new->global_dimension.time_index = src_var_dims->global_dimension.time_index;
-        d_new->local_offset.id = 0;
+        d_new->local_offset.var = NULL;
         d_new->local_offset.rank = adios_get_dim_value(&src_var_dims->local_offset);
         d_new->local_offset.time_index = src_var_dims->local_offset.time_index;
         d_new->next = 0;
