@@ -5272,7 +5272,7 @@ int adios_multiply_dimensions (uint64_t * size
 uint64_t adios_get_dimension_space_size (struct adios_var_struct *var
                                         ,struct adios_dimension_struct * d
                                         ,struct adios_group_struct * group) {
-    uint64_t size;
+    uint64_t size = 1;
     while (d)
     {
         // calculate the size for this dimension element
