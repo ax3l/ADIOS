@@ -137,6 +137,8 @@ struct adios_transform_spec * adios_transform_spec_copy(struct adios_transform_s
                 else
                     dst_kv->value = NULL;
             }
+        } else {
+            dst->params = NULL;
         }
     } else {
         dst->backing_str = NULL;
