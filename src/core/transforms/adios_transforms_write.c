@@ -380,7 +380,7 @@ int adios_transform_init_transform_var(struct adios_var_struct *var) {
 }
 
 // Serialize
-static void adios_transform_dereference_dimensions_characteristic(struct adios_file_struct *fd, struct adios_index_characteristic_dims_struct_v1 *dst_char_dims, const struct adios_dimension_struct *src_var_dims) {
+static void adios_transform_dereference_dimensions_characteristic(struct adios_index_characteristic_dims_struct_v1 *dst_char_dims, const struct adios_dimension_struct *src_var_dims) {
     uint8_t i;
     uint8_t c = count_dimensions(src_var_dims);
 
@@ -390,9 +390,9 @@ static void adios_transform_dereference_dimensions_characteristic(struct adios_f
     uint64_t *ptr = dst_char_dims->dims;
     for (i = 0; i < c; i++)
     {
-        ptr[0] = get_value_for_dim(fd, &src_var_dims->dimension);
-        ptr[1] = get_value_for_dim(fd, &src_var_dims->global_dimension);
-        ptr[2] = get_value_for_dim(fd, &src_var_dims->local_offset);
+        ptr[0] = adios_get_dim_value(&src_var_dims->dimension);
+        ptr[1] = adios_get_dim_value(&src_var_dims->global_dimension);
+        ptr[2] = adios_get_dim_value(&src_var_dims->local_offset);
         src_var_dims = src_var_dims->next;
         ptr += 3; // Go to the next set of 3
     }
@@ -495,7 +495,7 @@ uint8_t adios_transform_serialize_transform_characteristic(const struct adios_in
            );
 }
 
-uint8_t adios_transform_serialize_transform_var(struct adios_file_struct *fd, const struct adios_var_struct *var, uint64_t *write_length,
+uint8_t adios_transform_serialize_transform_var(const struct adios_var_struct *var, uint64_t *write_length,
                                                 char **buffer, uint64_t *buffer_size, uint64_t *buffer_offset) {
 
     // In this case, we are going to actually serialize the dimensions as a
@@ -504,7 +504,7 @@ uint8_t adios_transform_serialize_transform_var(struct adios_file_struct *fd, co
     // to the common serialization routine.
 
     struct adios_index_characteristic_dims_struct_v1 tmp_dims;
-    adios_transform_dereference_dimensions_characteristic(fd, &tmp_dims, var->pre_transform_dimensions);
+    adios_transform_dereference_dimensions_characteristic(&tmp_dims, var->pre_transform_dimensions);
 
     // Perform the serialization using the common function with the temp dimension structure
     uint8_t char_write_count =
@@ -546,13 +546,13 @@ int adios_transform_clear_transform_var(struct adios_var_struct *var) {
 }
 
 // Copy
-int adios_transform_copy_transform_characteristic(struct adios_file_struct *fd, struct adios_index_characteristic_transform_struct *dst_transform, const struct adios_var_struct *src_var) {
+int adios_transform_copy_transform_characteristic(struct adios_index_characteristic_transform_struct *dst_transform, const struct adios_var_struct *src_var) {
     adios_transform_init_transform_characteristic(dst_transform);
 
     dst_transform->transform_type = src_var->transform_type;
     dst_transform->pre_transform_type = src_var->pre_transform_type;
 
-    adios_transform_dereference_dimensions_characteristic(fd, &dst_transform->pre_transform_dimensions, src_var->pre_transform_dimensions);
+    adios_transform_dereference_dimensions_characteristic(&dst_transform->pre_transform_dimensions, src_var->pre_transform_dimensions);
 
     dst_transform->transform_metadata_len = src_var->transform_metadata_len;
     if (src_var->transform_metadata_len) {
