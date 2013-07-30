@@ -3293,7 +3293,7 @@ void adios_build_index_v1 (struct adios_file_struct * fd,
                         // NCSU - End of copy, for statistics
 
                         // NCSU ALACRITY-ADIOS - copy transform type field
-                        adios_transform_copy_transform_characteristic(fd, &v_index->characteristics[0].transform, v);
+                        adios_transform_copy_transform_characteristic(&v_index->characteristics[0].transform, v);
 
                         c = count_dimensions (v->dimensions);
                         v_index->characteristics [0].dims.count = c;
@@ -4549,9 +4549,7 @@ uint16_t adios_write_var_characteristics_v1 (struct adios_file_struct * fd
                 uint8_t char_write_count = 0;
 
                 char_write_count = adios_transform_serialize_transform_var(
-                    fd, v, &char_write_length,
-                    &fd->buffer, &fd->buffer_size, &fd->offset
-                );
+                    v, &char_write_length, &fd->buffer, &fd->buffer_size, &fd->offset);
 
                 characteristic_set_count += char_write_count;
                 index_size += char_write_length;
