@@ -16,8 +16,6 @@
 #include "adios_transforms_write.h"
 #include "adios_transforms_specparse.h"
 
-typedef char bool;
-
 ////////////////////////////////////////
 // adios_group_size support
 ////////////////////////////////////////
@@ -33,8 +31,8 @@ uint64_t adios_transform_worst_case_transformed_group_size(uint64_t group_size, 
 
     // Table of what transform types have been seen so far.
     // Allocated on stack; no dynamic memory to clean up.
-    bool transform_type_seen[num_adios_transform_types];
-    memset(transform_type_seen, 0, num_adios_transform_types * sizeof(bool));
+    int transform_type_seen[num_adios_transform_types];
+    memset(transform_type_seen, 0, num_adios_transform_types * sizeof(int));
 
     // Identify all transform methods used, and count the number of non-scalar
     // variables
