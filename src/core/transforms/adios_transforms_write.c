@@ -242,7 +242,7 @@ uint64_t adios_transform_get_pre_transform_var_size(struct adios_group_struct *g
 }
 
 static inline uint64_t generate_unique_block_id(const struct adios_file_struct * fd, const struct adios_var_struct *var) {
-    return (fd->group->process_id << 32) + var->write_count;
+    return ((uint64_t)fd->group->process_id << 32) + (uint64_t)var->write_count;
 }
 
 static int adios_transform_store_transformed_length(struct adios_file_struct * fd, struct adios_var_struct *var, uint64_t transformed_len) {
@@ -390,9 +390,10 @@ static void adios_transform_dereference_dimensions_characteristic(struct adios_i
     uint64_t *ptr = dst_char_dims->dims;
     for (i = 0; i < c; i++)
     {
-        ptr[0] = adios_get_dim_value(&src_var_dims->dimension);
-        ptr[1] = adios_get_dim_value(&src_var_dims->global_dimension);
-        ptr[2] = adios_get_dim_value(&src_var_dims->local_offset);
+        //  Casts to eliminate const-ness problems
+        ptr[0] = adios_get_dim_value((struct adios_dimension_item_struct *)&src_var_dims->dimension);
+        ptr[1] = adios_get_dim_value((struct adios_dimension_item_struct *)&src_var_dims->global_dimension);
+        ptr[2] = adios_get_dim_value((struct adios_dimension_item_struct *)&src_var_dims->local_offset);
         src_var_dims = src_var_dims->next;
         ptr += 3; // Go to the next set of 3
     }
