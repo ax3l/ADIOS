@@ -5266,112 +5266,78 @@ int adios_multiply_dimensions (uint64_t * size
     }
 }
 
-// NCSU ALACRITY-ADIOS - copied adios_get_var_size to work on a dimension
-//                       struct, rather than a var struct, so it can be
-//                       reused to compute the size from
-//                       pre_transform_dimensions
-// TODO: do simple delegation in adios_get_var_size to this function, if
-//       desired. Recommended to be done if this or that function are
-//       changed in any way.
+// NCSU ALACRITY-ADIOS - generalizes the dimension multiplication in adios_get_var_size
+//                       to work on a dimension struct, rather than a var struct, so it
+//                       can be reused to compute the size from pre_transform_dimensions
 // TODO: Factor out "var", since needed because of multiple_dimensions, which needs it only for debugging output
 uint64_t adios_get_dimension_space_size (struct adios_var_struct *var
-                                        ,enum ADIOS_DATATYPES type
                                         ,struct adios_dimension_struct * d
-                                        ,struct adios_group_struct * group, void * data
-                                        )
-{
-    uint64_t size = 0;
-    size = adios_get_type_size (type, data);
-
+                                        ,struct adios_group_struct * group) {
+    uint64_t size;
     while (d)
     {
         // calculate the size for this dimension element
-        if (d->dimension.id != 0)
+        if (d->dimension.var != 0)
         {
-            struct adios_var_struct * dim_var = 0;
-
-            dim_var = adios_find_var_by_id (group->vars, d->dimension.id);
-
-            // first check to make sure all vars are provided
-            if (!dim_var)
+            struct adios_var_struct * dim_var = d->dimension.var;
+            if (!dim_var->data)
             {
-                struct adios_attribute_struct * attr = 0;
-                attr = adios_find_attribute_by_id (group->attributes
-                        ,d->dimension.id
-                );
-                if (attr)
-                {
-                    if (attr->var)
-                    {
-                        if (!attr->var->data)
-                        {
-                            fprintf (stderr, "adios_get_dimension_space_size: "
-                                    "sizing of dimension space failed because "
-                                    "dimension component %s was "
-                                    "not provided\n"
-                                    ,attr->var->name
-                            );
-
-                            return 0;
-                        }
-                        else
-                        {
-                            if (!adios_multiply_dimensions (&size, var
-                                    ,attr->var->type
-                                    ,attr->var->data
-                            )
-                            )
-                            {
-                                return 0;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!adios_multiply_dimensions (&size, var
-                                ,attr->type
-                                ,attr->value
-                        )
-                        )
-                        {
-                            return 0;
-                        }
-                    }
-                }
-                else
-                {
-                    fprintf (stderr, "adios_get_dimension_space_size: "
-                            "sizing of dimension space failed because "
-                            "dimension component was not "
-                            "provided\n"
-                    );
-
-                    return 0;
-                }
+                adios_error (err_invalid_var_as_dimension,
+                        "adios_get_var_size: "
+                        "sizing of %s failed because "
+                        "dimension component %s was "
+                        "not provided\n",
+                        var->name, dim_var->name);
+                return 0;
             }
             else
             {
-                if (!dim_var->data)
+                if (!adios_multiply_dimensions (&size, var
+                            ,dim_var->type
+                            ,dim_var->data
+                            )
+                   )
                 {
-                    fprintf (stderr, "adios_get_dimension_space_size: "
-                            "sizing of dimension space failed because "
-                            "dimension component %s was not "
-                            "provided\n"
-                            ,dim_var->name
-                    );
-
+                    return 0;
+                }
+            }
+        }
+        else if (d->dimension.attr != NULL)
+        {
+            struct adios_attribute_struct * attr = d->dimension.attr;
+            if (attr->var)
+            {
+                if (!attr->var->data)
+                {
+                    adios_error (err_invalid_var_as_dimension,
+                            "adios_get_var_size: "
+                            "sizing of %s failed because "
+                            "dimension component %s was "
+                            "not provided\n",
+                            var->name, attr->var->name);
                     return 0;
                 }
                 else
                 {
                     if (!adios_multiply_dimensions (&size, var
-                            ,dim_var->type
-                            ,dim_var->data
-                    )
-                    )
+                                ,attr->var->type
+                                ,attr->var->data
+                                )
+                       )
                     {
                         return 0;
                     }
+                }
+            }
+            else
+            {
+                if (!adios_multiply_dimensions (&size, var
+                            ,attr->type
+                            ,attr->value
+                            )
+                   )
+                {
+                    return 0;
                 }
             }
         }
@@ -5386,100 +5352,18 @@ uint64_t adios_get_dimension_space_size (struct adios_var_struct *var
 
         d = d->next;
     }
+
     return size;
 }
 
+// NCSU ALACRITY-ADIOS: Refactored to call the above dimension space compute code
 uint64_t adios_get_var_size (struct adios_var_struct * var
         ,struct adios_group_struct * group, void * data
         )
 {
-    uint64_t size = 0;
-
-    size = adios_get_type_size (var->type, data);
-
+    uint64_t size = adios_get_type_size (var->type, data);
     if (var->dimensions)
-    {
-        struct adios_dimension_struct * d = var->dimensions;
-
-        while (d)
-        {
-            // calculate the size for this dimension element
-            if (d->dimension.var != 0)
-            {
-                struct adios_var_struct * dim_var = d->dimension.var;
-                if (!dim_var->data)
-                {
-                    adios_error (err_invalid_var_as_dimension,
-                            "adios_get_var_size: "
-                            "sizing of %s failed because "
-                            "dimension component %s was "
-                            "not provided\n",
-                            var->name, dim_var->name);
-                    return 0;
-                }
-                else
-                {
-                    if (!adios_multiply_dimensions (&size, var
-                                ,dim_var->type
-                                ,dim_var->data
-                                )
-                       )
-                    {
-                        return 0;
-                    }
-                }
-            }
-            else if (d->dimension.attr != NULL)
-            {
-                struct adios_attribute_struct * attr = d->dimension.attr;
-                if (attr->var)
-                {
-                    if (!attr->var->data)
-                    {
-                        adios_error (err_invalid_var_as_dimension,
-                                "adios_get_var_size: "
-                                "sizing of %s failed because "
-                                "dimension component %s was "
-                                "not provided\n",
-                                var->name, attr->var->name);
-                        return 0;
-                    }
-                    else
-                    {
-                        if (!adios_multiply_dimensions (&size, var
-                                    ,attr->var->type
-                                    ,attr->var->data
-                                    )
-                           )
-                        {
-                            return 0;
-                        }
-                    }
-                }
-                else
-                {
-                    if (!adios_multiply_dimensions (&size, var
-                                ,attr->type
-                                ,attr->value
-                                )
-                       )
-                    {
-                        return 0;
-                    }
-                }
-            }
-            else
-            {
-                if (d->dimension.time_index == adios_flag_no)
-                {
-                    size *= d->dimension.rank;
-                }
-                // the time index doesn't take up space...
-            }
-
-            d = d->next;
-        }
-    }
+        size *= adios_get_dimension_space_size(var, var->dimensions, group);
 
     return size;
 }

@@ -237,11 +237,10 @@ struct adios_var_struct * adios_transform_define_var(struct adios_group_struct *
 uint64_t adios_transform_get_pre_transform_var_size(struct adios_group_struct *group, struct adios_var_struct *var) {
     assert(var->dimensions);
     assert(var->type != adios_string);
-    return adios_get_dimension_space_size(var,
-                                          var->pre_transform_type,
+    return adios_get_type_size(var->pre_transform_type, NULL) *
+           adios_get_dimension_space_size(var,
                                           var->pre_transform_dimensions,
-                                          group,
-                                          NULL); // NULL because it's not a string, so unneeded
+                                          group);
 }
 
 static inline uint64_t generate_unique_block_id(const struct adios_file_struct * fd, const struct adios_var_struct *var) {
