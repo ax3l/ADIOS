@@ -4680,29 +4680,42 @@ int adios_generate_var_characteristics_v1 (struct adios_file_struct * fd, struct
         } \
         j ++; \
     } \
-    min = (a *) stats[map[adios_statistic_min]].data; \
-    max = (a *) stats[map[adios_statistic_max]].data; \
-    sum = (double *) stats[map[adios_statistic_sum]].data; \
-    sum_square = (double *) stats[map[adios_statistic_sum_square]].data; \
-    cnt = (uint32_t *) stats[map[adios_statistic_cnt]].data; \
-    *cnt = 0;\
-    if (map[adios_statistic_hist] != -1) {\
-        hist = (struct adios_hist_struct *) stats[map[adios_statistic_hist]].data; \
-        hist->frequencies = calloc ((hist->num_breaks + 1), adios_get_type_size(adios_unsigned_integer, "")); \
-    } \
-    int finite = 0; \
-    size = 0; \
-    while ((size * b) < total_size) \
-    { \
-        if (isnan (data [size]) || !isfinite (data [size])) {\
-            size ++; \
-            continue; \
-        }\
-        if (!finite) { \
+        min = (a *) stats[map[adios_statistic_min]].data; \
+        max = (a *) stats[map[adios_statistic_max]].data; \
+        sum = (double *) stats[map[adios_statistic_sum]].data; \
+        sum_square = (double *) stats[map[adios_statistic_sum_square]].data; \
+        cnt = (uint32_t *) stats[map[adios_statistic_cnt]].data; \
+        *cnt = 0;\
+        if (map[adios_statistic_hist] != -1) {\
+            hist = (struct adios_hist_struct *) stats[map[adios_statistic_hist]].data; \
+            hist->frequencies = calloc ((hist->num_breaks + 1), adios_get_type_size(adios_unsigned_integer, "")); \
+        } \
+        int finite = 0; \
+        size = 0; \
+        while ((size * b) < total_size) \
+        { \
+            if (isnan (data [size]) || !isfinite (data [size])) {\
+                size ++; \
+                continue; \
+            }\
+            if (!finite) { \
+                *min = data [size]; \
+                *max = data [size]; \
+                *sum = data [size]; \
+                *sum_square = (data [size] * data [size]) ; \
+                *cnt = *cnt + 1; \
+                if (map[adios_statistic_hist] != -1) \
+                HIST(data [size]); \
+                finite = 1; \
+                size ++; \
+                continue; \
+            } \
+            if (data [size] < *min) \
             *min = data [size]; \
+            if (data [size] > *max) \
             *max = data [size]; \
-            *sum = data [size]; \
-            *sum_square = (data [size] * data [size]) ; \
+            *sum += data [size]; \
+            *sum_square += (data [size] * data [size]) ; \
             *cnt = *cnt + 1; \
             if (map[adios_statistic_hist] != -1) \
             HIST(data [size]); \
