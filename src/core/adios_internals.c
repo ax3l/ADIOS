@@ -4611,9 +4611,7 @@ uint16_t adios_write_var_characteristics_v1 (struct adios_file_struct * fd
     return index_size;
 }
 
-int adios_generate_var_characteristics_v1 (struct adios_file_struct * fd
-        ,struct adios_var_struct * var
-        )
+int adios_generate_var_characteristics_v1 (struct adios_file_struct * fd, struct adios_var_struct * var)
 {
     uint64_t total_size = 0;
     uint64_t size = 0;
@@ -4663,50 +4661,50 @@ int adios_generate_var_characteristics_v1 (struct adios_file_struct * fd
 #if 1
 #define ADIOS_STATISTICS(a,b) \
 {\
-a * data = (a *) var->data; \
-int i, j; \
-struct adios_stat_struct * stats = var->stats[0]; \
-a * min, * max; \
-double * sum, * sum_square; \
-uint32_t * cnt; \
-struct adios_hist_struct * hist = 0; \
-i = j = 0; \
-while (var->bitmap >> j) { \
-    if ((var->bitmap >> j) & 1)    {\
-        map [j] = i; \
-        if (j == adios_statistic_hist) \
+    a * data = (a *) var->data; \
+    int i, j; \
+    struct adios_stat_struct * stats = var->stats[0]; \
+    a * min, * max; \
+    double * sum, * sum_square; \
+    uint32_t * cnt; \
+    struct adios_hist_struct * hist = 0; \
+    i = j = 0; \
+    while (var->bitmap >> j) { \
+        if ((var->bitmap >> j) & 1)    {\
+            map [j] = i; \
+            if (j == adios_statistic_hist) \
             ;\
-        else \
+            else \
             stats[i].data = malloc(adios_get_stat_size(NULL, original_var_type, j)); \
-        i ++; \
+            i ++; \
+        } \
+        j ++; \
     } \
-    j ++; \
-} \
-min = (a *) stats[map[adios_statistic_min]].data; \
-max = (a *) stats[map[adios_statistic_max]].data; \
-sum = (double *) stats[map[adios_statistic_sum]].data; \
-sum_square = (double *) stats[map[adios_statistic_sum_square]].data; \
-cnt = (uint32_t *) stats[map[adios_statistic_cnt]].data; \
-*cnt = 0;\
-if (map[adios_statistic_hist] != -1) {\
-    hist = (struct adios_hist_struct *) stats[map[adios_statistic_hist]].data; \
-    hist->frequencies = calloc ((hist->num_breaks + 1), adios_get_type_size(adios_unsigned_integer, "")); \
-} \
-int finite = 0; \
-size = 0; \
-while ((size * b) < total_size) \
-{ \
-    if (isnan (data [size]) || !isfinite (data [size])) {\
-        size ++; \
-        continue; \
-    }\
-    if (!finite) { \
-        *min = data [size]; \
-        *max = data [size]; \
-        *sum = data [size]; \
-        *sum_square = (data [size] * data [size]) ; \
-        *cnt = *cnt + 1; \
-        if (map[adios_statistic_hist] != -1) \
+    min = (a *) stats[map[adios_statistic_min]].data; \
+    max = (a *) stats[map[adios_statistic_max]].data; \
+    sum = (double *) stats[map[adios_statistic_sum]].data; \
+    sum_square = (double *) stats[map[adios_statistic_sum_square]].data; \
+    cnt = (uint32_t *) stats[map[adios_statistic_cnt]].data; \
+    *cnt = 0;\
+    if (map[adios_statistic_hist] != -1) {\
+        hist = (struct adios_hist_struct *) stats[map[adios_statistic_hist]].data; \
+        hist->frequencies = calloc ((hist->num_breaks + 1), adios_get_type_size(adios_unsigned_integer, "")); \
+    } \
+    int finite = 0; \
+    size = 0; \
+    while ((size * b) < total_size) \
+    { \
+        if (isnan (data [size]) || !isfinite (data [size])) {\
+            size ++; \
+            continue; \
+        }\
+        if (!finite) { \
+            *min = data [size]; \
+            *max = data [size]; \
+            *sum = data [size]; \
+            *sum_square = (data [size] * data [size]) ; \
+            *cnt = *cnt + 1; \
+            if (map[adios_statistic_hist] != -1) \
             HIST(data [size]); \
             size++; \
         } \
